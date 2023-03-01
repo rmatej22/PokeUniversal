@@ -17,9 +17,7 @@ export class PokemonService {
     return this.http.get(`${environment.baseUrl}/pokedex/1/`).pipe(
       map((res: any) => {
         let pokemons: Pokemon[] = [];
-        let reducedPokemonEntries = JSON.parse(
-          res._body
-        ).pokemon_entries.splice(0, 50);
+        let reducedPokemonEntries = res.pokemon_entries.splice(0, 50);
 
         reducedPokemonEntries.forEach((entry: PokemonEntry) => {
           let pokemon = new Pokemon(
@@ -41,25 +39,24 @@ export class PokemonService {
   getDetails(id: number): Observable<Pokemon> {
     return this.http.get(`${environment.baseUrl}/pokemon/${id}/`).pipe(
       map((res: any) => {
-        let response = JSON.parse(res._body);
-        let pokemon = new Pokemon(response.name, response.id, [], [], [], '');
+        let pokemon = new Pokemon(res.name, res.id, [], [], [], '');
 
-        response.types.forEach((type: PokemonType) => {
+        res.types.forEach((type: PokemonType) => {
           pokemon.types.push(type.type.name);
         });
 
-        response.stats.forEach((stat: PokemonStats) => {
+        res.stats.forEach((stat: PokemonStats) => {
           pokemon.stats.push({
             name: stat.stat.name,
             value: stat.base_stat,
           });
         });
 
-        for (let sprite in response.sprites) {
-          if (response.sprites[sprite]) {
+        for (let sprite in res.sprites) {
+          if (res.sprites[sprite] && typeof res.sprites[sprite] === 'string') {
             pokemon.sprites.push({
               name: sprite,
-              imagePath: response.sprites[sprite],
+              imagePath: res.sprites[sprite],
             });
           }
         }
