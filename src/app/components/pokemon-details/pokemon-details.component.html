@@ -1,6 +1,6 @@
 <div *ngIf="(pokemon$ | async) as pokemon"
      class="container mb-3">
-  <img [src]="pokemon.imageUrl">
+  <img [src]="pokemon.imageurl">
   <p>{{pokemon.name | titlecase}}</p>
   <h4>Types:</h4>
   <ul>

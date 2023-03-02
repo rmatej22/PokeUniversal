@@ -55,32 +55,50 @@ export class PokemonService {
   }
 
   getDetails(id: number): Observable<Pokemon> {
-    return this.http.get(`${environment.baseUrl}/pokemon/${id}/`).pipe(
-      map((res: any) => {
-        let pokemon = new Pokemon(res.name, res.id, [], [], [], '');
+    if (this.transferState.hasKey(POKEMON_DETAILS_KEY)) {
+      const pokemon = this.transferState.get(POKEMON_DETAILS_KEY, null as any);
+      this.transferState.remove(POKEMON_DETAILS_KEY);
+      return of(pokemon);
+    } else {
+      return this.http.get(`${environment.baseUrl}/pokemon/${id}/`).pipe(
+        map((res: any) => {
+          let pokemon = new Pokemon(
+            res.name,
+            res.id,
+            [],
+            [],
+            [],
+            `https://rawgit.com/PokeAPI/sprites/master/sprites/pokemon/${res.id}.png`
+          );
 
-        res.types.forEach((type: PokemonType) => {
-          pokemon.types.push(type.type.name);
-        });
-
-        res.stats.forEach((stat: PokemonStats) => {
-          pokemon.stats.push({
-            name: stat.stat.name,
-            value: stat.base_stat,
+          res.types.forEach((type: PokemonType) => {
+            pokemon.types.push(type.type.name);
           });
-        });
 
-        for (let sprite in res.sprites) {
-          if (res.sprites[sprite] && typeof res.sprites[sprite] === 'string') {
-            pokemon.sprites.push({
-              name: sprite,
-              imagePath: res.sprites[sprite],
+          res.stats.forEach((stat: PokemonStats) => {
+            pokemon.stats.push({
+              name: stat.stat.name,
+              value: stat.base_stat,
             });
-          }
-        }
+          });
 
-        return pokemon;
-      })
-    );
+          for (let sprite in res.sprites) {
+            if (
+              res.sprites[sprite] &&
+              typeof res.sprites[sprite] === 'string'
+            ) {
+              pokemon.sprites.push({
+                name: sprite,
+                imagePath: res.sprites[sprite],
+              });
+            }
+          }
+          if (isPlatformServer(this.platformId)) {
+            this.transferState.set(POKEMON_DETAILS_KEY, pokemon);
+          }
+          return pokemon;
+        })
+      );
+    }
   }
 }
