@@ -1,9 +1,7 @@
 export interface PokemonType {
-  slot: number;
-  type: Type;
-}
-
-export interface Type {
-  name: string;
-  url: string;
-}
+    slot: number;
+    type: {
+      name: string;
+      url: string;
+    };
+  }
