@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { Meta, Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Pokemon } from 'src/app/models/pokemon.model';
 import { PokemonService } from 'src/app/services/pokemon.service';
 
@@ -15,13 +16,23 @@ export class PokemonDetailsComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private pokemonService: PokemonService
+    private pokemonService: PokemonService,
+    private title: Title,
+    private meta: Meta
   ) {}
 
   ngOnInit(): void {
     this.route.params.subscribe((params) => {
       this.id = params['id'];
-      this.pokemon$ = this.pokemonService.getDetails(this.id);
+      this.pokemon$ = this.pokemonService.getDetails(this.id).pipe(
+        tap((pokemon) => {
+          this.title.setTitle(`Pokemon details - ${pokemon.name}`);
+          this.meta.updateTag({
+            name: 'description',
+            content: `Explore interesting facts about your favorite pokemon - ${pokemon.name}`,
+          });
+        })
+      );
     });
   }
 }
